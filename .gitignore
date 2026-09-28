@@ -1,0 +1,3 @@
+node_modules/
+tracker_database.db
+.env

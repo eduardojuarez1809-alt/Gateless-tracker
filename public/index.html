@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Gateless - Agent Tracker</title>
+  <style>
+    body { font-family: sans-serif; background: #f4f7f6; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+    .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 350px; text-align: center; }
+    .timer { font-size: 2rem; font-weight: bold; margin: 15px 0; color: #1e2246; }
+    .timer.overtime { color: red; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    button { padding: 10px; font-weight: bold; cursor: pointer; border-radius: 6px; border: none; background: #edf2f4; }
+    button:hover { background: #00b4d8; color: white; }
+    .btn-out { grid-column: span 2; background: #d90429; color: white; }
+    input { width: 100%; padding: 8px; margin-bottom: 10px; text-align: center; box-sizing: border-box; }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <h2>gateless</h2>
+  <input type="text" id="agentName" placeholder="Tu Nombre / ID" oninput="localStorage.setItem('agent', this.value)">
+  <div id="statusBadge">Estado: Offline</div>
+  <div class="timer" id="timer">00:00:00</div>
+
+  <div class="grid">
+    <button onclick="changeStatus('Available', 0)">Available</button>
+    <button onclick="changeStatus('Break 1', 15)">Break 1 (15m)</button>
+    <button onclick="changeStatus('Lunch', 60)">Lunch (60m)</button>
+    <button onclick="changeStatus('Break 2', 15)">Break 2 (15m)</button>
+    <button onclick="changeStatus('Bathroom', 0)">Bathroom</button>
+    <button onclick="changeStatus('Personal', 0)">Personal</button>
+    <button class="btn-out" onclick="changeStatus('Out of Shift', 0)">Out of Shift</button>
+  </div>
+</div>
+
+<script>
+  let currentStatus = 'Offline';
+  let startTime = null;
+  let timerInterval = null;
+  let maxMin = 0;
+
+  window.onload = () => {
+    if(localStorage.getItem('agent')) document.getElementById('agentName').value = localStorage.getItem('agent');
+  };
+
+  function changeStatus(newStatus, limit) {
+    const agent = document.getElementById('agentName').value.trim();
+    if (!agent) return alert("Ingresa tu nombre");
+
+    const now = new Date();
+
+    if (currentStatus !== 'Offline' && startTime) {
+      const durSec = Math.floor((now - startTime) / 1000);
+      const durMin = parseFloat((durSec / 60).toFixed(2));
+      const isOver = maxMin > 0 && durSec > (maxMin * 60);
+
+      fetch('/api/status', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          agent, status: currentStatus,
+          startTime: startTime.toLocaleTimeString(),
+          endTime: now.toLocaleTimeString(),
+          durationSeconds: durSec,
+          durationMinutes: durMin,
+          overtime: isOver ? "SÍ" : "NO"
+        })
+      });
+    }
+
+    if (newStatus === 'Out of Shift') {
+      clearInterval(timerInterval);
+      document.getElementById('timer').innerText = "00:00:00";
+      document.getElementById('statusBadge').innerText = "Estado: Offline";
+      currentStatus = 'Offline';
+      return;
+    }
+
+    currentStatus = newStatus;
+    maxMin = limit;
+    startTime = now;
+    document.getElementById('statusBadge').innerText = "Estado: " + newStatus;
+
+    clearInterval(timerInterval);
+    timerInterval = setInterval(() => {
+      const elapsed = Math.floor((new Date() - startTime) / 1000);
+      const hrs = String(Math.floor(elapsed / 3600)).padStart(2, '0');
+      const mins = String(Math.floor((elapsed % 3600) / 60)).padStart(2, '0');
+      const secs = String(elapsed % 60).padStart(2, '0');
+      const tElem = document.getElementById('timer');
+      tElem.innerText = `${hrs}:${mins}:${secs}`;
+      if (maxMin > 0 && elapsed > maxMin * 60) tElem.classList.add('overtime');
+      else tElem.classList.remove('overtime');
+    }, 1000);
+  }
+</script>
+</body>
+</html>

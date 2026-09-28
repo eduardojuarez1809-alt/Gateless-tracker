@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Panel de Administración - Gateless</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; background: #f4f7f6; }
+    h1 { color: #1e2246; }
+    .actions { margin-bottom: 20px; display: flex; gap: 10px; }
+    table { width: 100%; border-collapse: collapse; background: white; margin-top: 15px; }
+    th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+    th { background-color: #00b4d8; color: white; }
+    .btn-download { padding: 10px 15px; background: #2b9348; color: white; border: none; border-radius: 5px; cursor: pointer; text-decoration: none; font-weight: bold; }
+    .btn-clear { padding: 10px 15px; background: #d90429; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
+    .btn-clear:hover { background: #b00020; }
+  </style>
+</head>
+<body>
+
+  <h1>Dashboard de Supervisión de Agentes</h1>
+  
+  <div class="actions">
+    <a href="/api/admin/download-excel" class="btn-download">📊 Descargar Excel Completo</a>
+    <button onclick="clearData()" class="btn-clear">🗑️ Reiniciar / Borrar Data</button>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Agente</th>
+        <th>Estado</th>
+        <th>Hora Inicio</th>
+        <th>Hora Fin</th>
+        <th>Duración (Min)</th>
+        <th>Overtime</th>
+        <th>Fecha Registro</th>
+      </tr>
+    </thead>
+    <tbody id="logsTable"></tbody>
+  </table>
+
+  <script>
+    function loadData() {
+      fetch('/api/admin/logs')
+        .then(res => res.json())
+        .then(data => {
+          const tbody = document.getElementById('logsTable');
+          tbody.innerHTML = '';
+          data.forEach(row => {
+            tbody.innerHTML += `
+              <tr>
+                <td><b>${row.agent}</b></td>
+                <td>${row.status}</td>
+                <td>${row.start_time}</td>
+                <td>${row.end_time}</td>
+                <td>${row.duration_minutes} min</td>
+                <td style="color: ${row.overtime === 'SÍ' ? 'red' : 'green'}; font-weight: bold;">${row.overtime}</td>
+                <td>${row.created_at}</td>
+              </tr>
+            `;
+          });
+        });
+    }
+
+    function clearData() {
+      const confirmAction = confirm("⚠️ ¿Estás seguro de que deseas borrar TODOS los registros? Esta acción no se puede deshacer.");
+      if (confirmAction) {
+        fetch('/api/admin/clear-logs', { method: 'DELETE' })
+          .then(res => res.json())
+          .then(data => {
+            alert("Data reiniciada con éxito.");
+            loadData();
+          })
+          .catch(err => alert("Error al borrar la data: " + err));
+      }
+    }
+
+    loadData();
+    setInterval(loadData, 5000);
+  </script>
+</body>
+</html>
