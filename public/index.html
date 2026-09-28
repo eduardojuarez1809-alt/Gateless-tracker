@@ -1,99 +1,372 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>Gateless - Agent Tracker</title>
-  <style>
-    body { font-family: sans-serif; background: #f4f7f6; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
-    .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 350px; text-align: center; }
-    .timer { font-size: 2rem; font-weight: bold; margin: 15px 0; color: #1e2246; }
-    .timer.overtime { color: red; }
-    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    button { padding: 10px; font-weight: bold; cursor: pointer; border-radius: 6px; border: none; background: #edf2f4; }
-    button:hover { background: #00b4d8; color: white; }
-    .btn-out { grid-column: span 2; background: #d90429; color: white; }
-    input { width: 100%; padding: 8px; margin-bottom: 10px; text-align: center; box-sizing: border-box; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gateless - Agent Tracker</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: #f0f4f8;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .card {
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+            width: 100%;
+            max-width: 440px;
+            padding: 32px 28px;
+            text-align: center;
+            border-top: 6px solid #00a8e8;
+            position: relative;
+        }
+
+        .brand-title {
+            color: #0f172a;
+            font-size: 28px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            margin-bottom: 2px;
+        }
+
+        .brand-subtitle {
+            color: #00a8e8;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 2.5px;
+            text-transform: uppercase;
+            margin-bottom: 24px;
+        }
+
+        .input-group {
+            margin-bottom: 14px;
+        }
+
+        .agent-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #1e293b;
+            text-align: center;
+            outline: none;
+            transition: all 0.2s ease;
+            background-color: #f8fafc;
+        }
+
+        .agent-input:focus {
+            border-color: #00a8e8;
+            background-color: #ffffff;
+            box-shadow: 0 0 0 3px rgba(0, 168, 232, 0.15);
+        }
+
+        .status-pill {
+            background-color: #e2e8f0;
+            color: #475569;
+            font-size: 13px;
+            font-weight: 600;
+            padding: 8px 16px;
+            border-radius: 20px;
+            display: inline-block;
+            width: 100%;
+            margin-bottom: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .status-pill.active {
+            background-color: #dcfce7;
+            color: #15803d;
+        }
+
+        .timer-display {
+            font-size: 48px;
+            font-weight: 800;
+            color: #0f172a;
+            font-variant-numeric: tabular-nums;
+            letter-spacing: -1px;
+            margin: 12px 0 24px 0;
+        }
+
+        .grid-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 14px;
+        }
+
+        .btn-status {
+            background-color: #f1f5f9;
+            color: #334155;
+            border: 1px solid #e2e8f0;
+            padding: 14px 10px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-status:hover:not(:disabled) {
+            background-color: #e2e8f0;
+            color: #0f172a;
+            border-color: #cbd5e1;
+            transform: translateY(-1px);
+        }
+
+        .btn-status.selected {
+            background-color: #0f172a;
+            color: #ffffff;
+            border-color: #0f172a;
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
+        }
+
+        .btn-out {
+            width: 100%;
+            background-color: #dc2626;
+            color: #ffffff;
+            border: none;
+            padding: 14px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(220, 38, 38, 0.2);
+        }
+
+        .btn-out:hover:not(:disabled) {
+            background-color: #b91c1c;
+            transform: translateY(-1px);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .message {
+            margin-top: 16px;
+            font-size: 13px;
+            font-weight: 500;
+            min-height: 18px;
+        }
+
+        .message.success { color: #16a34a; }
+        .message.error { color: #dc2626; }
+    </style>
 </head>
 <body>
 
-<div class="card">
-  <h2>gateless</h2>
-  <input type="text" id="agentName" placeholder="Tu Nombre / ID" oninput="localStorage.setItem('agent', this.value)">
-  <div id="statusBadge">Estado: Offline</div>
-  <div class="timer" id="timer">00:00:00</div>
+    <div class="card">
+        <div class="brand-title">Gateless</div>
+        <div class="brand-subtitle">AGENT TRACKER</div>
 
-  <div class="grid">
-    <button onclick="changeStatus('Available', 0)">Available</button>
-    <button onclick="changeStatus('Break 1', 15)">Break 1 (15m)</button>
-    <button onclick="changeStatus('Lunch', 60)">Lunch (60m)</button>
-    <button onclick="changeStatus('Break 2', 15)">Break 2 (15m)</button>
-    <button onclick="changeStatus('Bathroom', 0)">Bathroom</button>
-    <button onclick="changeStatus('Personal', 0)">Personal</button>
-    <button class="btn-out" onclick="changeStatus('Out of Shift', 0)">Out of Shift</button>
-  </div>
-</div>
+        <div class="input-group">
+            <input type="text" id="agentInput" class="agent-input" placeholder="Nombre de Agente" autocomplete="off">
+        </div>
 
-<script>
-  let currentStatus = 'Offline';
-  let startTime = null;
-  let timerInterval = null;
-  let maxMin = 0;
+        <div id="statusPill" class="status-pill">Estado: Offline</div>
 
-  window.onload = () => {
-    if(localStorage.getItem('agent')) document.getElementById('agentName').value = localStorage.getItem('agent');
-  };
+        <div id="timerDisplay" class="timer-display">00:00:00</div>
 
-  function changeStatus(newStatus, limit) {
-    const agent = document.getElementById('agentName').value.trim();
-    if (!agent) return alert("Ingresa tu nombre");
+        <div class="grid-buttons">
+            <button class="btn-status" onclick="seleccionarEstado('Available', this)">Available</button>
+            <button class="btn-status" onclick="seleccionarEstado('Break 1 (15m)', this)">Break 1 (15m)</button>
+            <button class="btn-status" onclick="seleccionarEstado('Lunch (60m)', this)">Lunch (60m)</button>
+            <button class="btn-status" onclick="seleccionarEstado('Break 2 (15m)', this)">Break 2 (15m)</button>
+            <button class="btn-status" onclick="seleccionarEstado('Bathroom', this)">Bathroom</button>
+            <button class="btn-status" onclick="seleccionarEstado('Personal (Emerg.)', this)">Personal (Emerg.)</button>
+        </div>
 
-    const now = new Date();
+        <button id="btnOut" class="btn-out" onclick="detenerMarca()" disabled>Out of Shift</button>
 
-    if (currentStatus !== 'Offline' && startTime) {
-      const durSec = Math.floor((now - startTime) / 1000);
-      const durMin = parseFloat((durSec / 60).toFixed(2));
-      const isOver = maxMin > 0 && durSec > (maxMin * 60);
+        <div id="messageDiv" class="message"></div>
+    </div>
 
-      fetch('/api/status', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          agent, status: currentStatus,
-          startTime: startTime.toLocaleTimeString(),
-          endTime: now.toLocaleTimeString(),
-          durationSeconds: durSec,
-          durationMinutes: durMin,
-          overtime: isOver ? "SÍ" : "NO"
-        })
-      });
-    }
+    <script>
+        let timerInterval = null;
+        let startTime = null;
+        let estadoActual = null;
 
-    if (newStatus === 'Out of Shift') {
-      clearInterval(timerInterval);
-      document.getElementById('timer').innerText = "00:00:00";
-      document.getElementById('statusBadge').innerText = "Estado: Offline";
-      currentStatus = 'Offline';
-      return;
-    }
+        const agentInput = document.getElementById('agentInput');
+        const statusPill = document.getElementById('statusPill');
+        const timerDisplay = document.getElementById('timerDisplay');
+        const btnOut = document.getElementById('btnOut');
+        const messageDiv = document.getElementById('messageDiv');
+        const statusButtons = document.querySelectorAll('.btn-status');
 
-    currentStatus = newStatus;
-    maxMin = limit;
-    startTime = now;
-    document.getElementById('statusBadge').innerText = "Estado: " + newStatus;
+        window.addEventListener('DOMContentLoaded', () => {
+            const sesionGuardada = localStorage.getItem('gateless_active_session');
+            if (sesionGuardada) {
+                try {
+                    const datos = JSON.parse(sesionGuardada);
+                    agentInput.value = datos.agent;
+                    estadoActual = datos.status;
+                    startTime = datos.startTime;
 
-    clearInterval(timerInterval);
-    timerInterval = setInterval(() => {
-      const elapsed = Math.floor((new Date() - startTime) / 1000);
-      const hrs = String(Math.floor(elapsed / 3600)).padStart(2, '0');
-      const mins = String(Math.floor((elapsed % 3600) / 60)).padStart(2, '0');
-      const secs = String(elapsed % 60).padStart(2, '0');
-      const tElem = document.getElementById('timer');
-      tElem.innerText = `${hrs}:${mins}:${secs}`;
-      if (maxMin > 0 && elapsed > maxMin * 60) tElem.classList.add('overtime');
-      else tElem.classList.remove('overtime');
-    }, 1000);
-  }
-</script>
+                    marcarBotonSeleccionado(datos.status);
+                    actualizarEstadoUI(true);
+                    
+                    timerInterval = setInterval(actualizarCronometro, 1000);
+                    actualizarCronometro();
+                    
+                    mostrarMensaje("Sesión restaurada activamente.", "success");
+                } catch (e) {
+                    localStorage.removeItem('gateless_active_session');
+                }
+            }
+        });
+
+        function seleccionarEstado(nombreEstado, botonElemento) {
+            const agente = agentInput.value.trim();
+
+            if (!agente) {
+                mostrarMensaje("Por favor ingresa tu nombre antes de marcar.", "error");
+                agentInput.focus();
+                return;
+            }
+
+            // Si ya hay un estado en curso, primero guardamos la marca anterior en SQLite
+            if (localStorage.getItem('gateless_active_session')) {
+                detenerMarcaSilenciosamente().then(() => {
+                    iniciarNuevoEstado(agente, nombreEstado, botonElemento);
+                });
+            } else {
+                iniciarNuevoEstado(agente, nombreEstado, botonElemento);
+            }
+        }
+
+        function iniciarNuevoEstado(agente, nombreEstado, botonElemento) {
+            startTime = Date.now();
+            estadoActual = nombreEstado;
+
+            const sesion = {
+                agent: agente,
+                status: nombreEstado,
+                startTime: startTime,
+                isoStartTime: new Date(startTime).toISOString()
+            };
+
+            localStorage.setItem('gateless_active_session', JSON.stringify(sesion));
+
+            // Resaltar botón activo
+            statusButtons.forEach(btn => btn.classList.remove('selected'));
+            if (botonElemento) botonElemento.classList.add('selected');
+
+            actualizarEstadoUI(true);
+
+            if (timerInterval) clearInterval(timerInterval);
+            timerInterval = setInterval(actualizarCronometro, 1000);
+            actualizarCronometro();
+
+            mostrarMensaje(`Estado: ${nombreEstado}`, "success");
+        }
+
+        async function detenerMarcaSilenciosamente() {
+            const sesionGuardada = localStorage.getItem('gateless_active_session');
+            if (!sesionGuardada) return;
+
+            const datos = JSON.parse(sesionGuardada);
+            const endTime = Date.now();
+            const durationSeconds = Math.floor((endTime - datos.startTime) / 1000);
+
+            const payload = {
+                agent: datos.agent,
+                status: datos.status,
+                start_time: datos.isoStartTime,
+                end_time: new Date(endTime).toISOString(),
+                duration_seconds: durationSeconds,
+                duration_minutes: parseFloat((durationSeconds / 60).toFixed(2)),
+                overtime: "No"
+            };
+
+            try {
+                await fetch('/api/logs', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+            } catch (e) {
+                console.error("Error al guardar la transición:", e);
+            }
+        }
+
+        async function detenerMarca() {
+            const sesionGuardada = localStorage.getItem('gateless_active_session');
+            if (!sesionGuardada) return;
+
+            btnOut.disabled = true;
+            mostrarMensaje("Cerrando turno...", "success");
+
+            await detenerMarcaSilenciosamente();
+
+            localStorage.removeItem('gateless_active_session');
+            resetUI();
+            mostrarMensaje("Turno finalizado correctamente.", "success");
+        }
+
+        function actualizarCronometro() {
+            if (!startTime) return;
+            const diff = Math.floor((Date.now() - startTime) / 1000);
+            const hrs = String(Math.floor(diff / 3600)).padStart(2, '0');
+            const mins = String(Math.floor((diff % 3600) / 60)).padStart(2, '0');
+            const secs = String(diff % 60).padStart(2, '0');
+            timerDisplay.innerText = `${hrs}:${mins}:${secs}`;
+        }
+
+        function actualizarEstadoUI(activo) {
+            agentInput.disabled = activo;
+            btnOut.disabled = !activo;
+
+            if (activo) {
+                statusPill.innerText = `Estado: ${estadoActual}`;
+                statusPill.classList.add('active');
+            } else {
+                statusPill.innerText = "Estado: Offline";
+                statusPill.classList.remove('active');
+            }
+        }
+
+        function marcarBotonSeleccionado(nombreEstado) {
+            statusButtons.forEach(btn => {
+                if (btn.innerText.trim() === nombreEstado) {
+                    btn.classList.add('selected');
+                } else {
+                    btn.classList.remove('selected');
+                }
+            });
+        }
+
+        function resetUI() {
+            if (timerInterval) clearInterval(timerInterval);
+            timerInterval = null;
+            startTime = null;
+            estadoActual = null;
+            timerDisplay.innerText = "00:00:00";
+            statusButtons.forEach(btn => btn.classList.remove('selected'));
+            actualizarEstadoUI(false);
+        }
+
+        function mostrarMensaje(texto, tipo) {
+            messageDiv.innerText = texto;
+            messageDiv.className = `message ${tipo}`;
+        }
+    </script>
 </body>
 </html>
